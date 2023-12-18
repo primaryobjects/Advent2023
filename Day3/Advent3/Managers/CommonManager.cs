@@ -10,7 +10,6 @@ namespace Managers
 {
     // 521515
     // 69527306
-
     public static class CommonManager
     {
         #region Objects
@@ -267,24 +266,36 @@ namespace Managers
         }
 
         /// <summary>
-        /// Find all adjacent numbers to any symbol in the map and return a list for the sum of the values.
+        /// Find all adjacent numbers to any symbol in the map and return a post-processed list for the values.
         /// </summary>
         /// <param name="mapping">Mapping</param>
         /// <returns>List of int</returns>
-        public static List<int> FindAdjacent(Mapping mapping)
+        private static List<int> _findAdjacent(Mapping mapping, Func<IEnumerable<int>, IEnumerable<int>> callback, char? symbol = null)
         {
             List<int> result = new();
 
-            foreach (var item in mapping.Hash)
+            foreach (var item in mapping.Hash.Where(item => symbol == null || item.Symbol == symbol))
             {
                 // Find all adjacent numbers to the current symbol.
                 List<int> numbers = _findAdjacentNumbers(mapping, item);
 
-                // Sum all numbers.
-                result.AddRange(numbers.Where(number => number > 0));
+                // Post-process numbers.
+                result.AddRange(callback(numbers));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Find all adjacent numbers to any symbol in the map and return a list of numbers.
+        /// </summary>
+        /// <param name="mapping">Mapping</param>
+        /// <returns>List of int</returns>
+        public static List<int> FindParts(Mapping mapping)
+        {
+            var callback = new Func<IEnumerable<int>, IEnumerable<int>>(numbers => numbers.Where(number => number > 0));
+
+            return _findAdjacent(mapping, callback);
         }
 
         /// <summary>
@@ -292,25 +303,26 @@ namespace Managers
         /// </summary>
         /// <param name="mapping">Mapping</param>
         /// <returns>List of int</returns>
-        public static List<int> FindAdjacentGears(Mapping mapping)
+        public static List<int> FindGears(Mapping mapping)
         {
-            List<int> result = new();
-
-            foreach (var item in mapping.Hash.Where(item => item.Symbol == '*'))
-            {
-                // Find all adjacent numbers to the current '*' symbol.
-                List<int> numbers = _findAdjacentNumbers(mapping, item);
-
+            var callback = new Func<IEnumerable<int>, IEnumerable<int>>(numbers => {
                 // Check if there are at least two values.
                 int count = numbers.Where(number => number > 0).Count();
                 if (count >= 2)
                 {
                     // Multiply the numbers.
-                    result.Add(numbers.Where(number => number > 0).Aggregate((a, b) => a * b));
+                    return new List<int>() {
+                        numbers.Where(number => number > 0).Aggregate((a, b) => a * b)
+                    };
+                }
+                else
+                {
+                    return new List<int>();
                 }
             }
+            );
 
-            return result;
+            return _findAdjacent(mapping, callback, '*');
         }
     }
 }
