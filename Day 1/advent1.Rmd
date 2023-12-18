@@ -1,0 +1,91 @@
+---
+title: "Advent of Code 2023 Day 1"
+author: "Kory Becker"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require(stringr)) {
+  install.packages("stringr")
+  library(stringr)
+}
+```
+
+## Advent of Code 2023, Day 1
+
+This document contains a solution to [Day 1](https://adventofcode.com/2023/day/1) of Advent of Code 2023.
+
+## Read the data
+
+First, we'll save the input file and read the data.
+
+```{r}
+data <- read.csv('input.txt', header=F, col.names = 'codes')
+head(data)
+```
+
+## Collect first and last digit from each code
+
+The next step is to enumerate all codes, extract the first and (optional) last digit, and add the resulting values together.
+
+```{r}
+result <- lapply(seq(nrow(data)), function(i) {
+  code <- data[i,]
+  
+  digits <- str_extract_all(code, "\\d")[[1]]
+  
+  first_digit <- digits[1]
+  last_digit <- tail(digits, n = 1)
+  
+  c(first_digit = first_digit, last_digit = last_digit, combined = paste0(first_digit, last_digit))
+})
+```
+
+## Sum the values of all digits
+
+The final step is to sum the resulting values to produce the final answer.
+
+```{r}
+values <- lapply(seq(result), function(i) {
+  value <- as.integer(result[[i]]['combined'])
+  c(value)
+})
+
+print(sum(unlist(values)))
+```
+## Second Part - replace spelled numbers with actual numbers and recalculate
+
+Note, we insert the integer representation of the spelled digit in the middle of the word. This is due to the fact that some digits begin with the last letter of the previous digit, such as `nineight`. In this case, our replacement becomes `nin9eigh8t`.
+
+Since we extract the digits into an array, this replacement does not affect the result.
+
+```{r}
+result2 <- lapply(seq(nrow(data)), function(i) {
+  code <- data[i,]
+  
+  code <- str_replace_all(code, c('one' = 'on1e', 'two' = 'tw2o', 'three' = 'thre3e', 
+                                 'four' = 'fou4r', 'five' = 'fiv5e', 'six' = 'si6x', 
+                                 'seven' = 'seve7n', 'eight' = 'eigh8t', 'nine' = 'nin9e'))
+
+  digits <- str_extract_all(code, "\\d")[[1]]
+  
+  first_digit <- digits[1]
+  last_digit <- tail(digits, n = 1)
+  
+  c(first_digit = first_digit, last_digit = last_digit, combined = paste0(first_digit, last_digit))
+})
+```
+
+```{r, echo=F}
+values2 <- lapply(seq(result2), function(i) {
+  value <- as.integer(result2[[i]]['combined'])
+  c(value)
+})
+
+print(sum(unlist(values2)))
+```

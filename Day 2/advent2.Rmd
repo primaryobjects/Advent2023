@@ -1,0 +1,92 @@
+---
+title: "Advent of Code 2023 Day 2"
+author: "Kory Becker"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require(stringr)) {
+  install.packages("stringr")
+  library(stringr)
+}
+```
+
+## Advent of Code 2023, Day 2
+
+This document contains a solution to [Day 2](https://adventofcode.com/2023/day/2) of Advent of Code 2023.
+
+## Read the data
+
+First, we'll read the input file as a line-by-line text file.
+
+```{r}
+con <- file('input.txt', 'r')
+data <- readLines(con)
+close(con)
+```
+
+## Parse the lines
+
+The next step is to extract the red, green, and blue values from each line.
+
+```{r}
+values <- lapply(seq(data), function(i) {
+  text <- data[i]
+  
+  # Extract the numbers for blue, red, and green
+  blue <- as.numeric(unlist(str_extract_all(text, "\\d+(?=\\s+blue)")))
+  red <- as.numeric(unlist(str_extract_all(text, "\\d+(?=\\s+red)")))
+  green <- as.numeric(unlist(str_extract_all(text, "\\d+(?=\\s+green)")))
+
+  c(red=list(red), green=list(green), blue=list(blue))
+})
+```
+
+## Find the max for each color per game
+
+Next, we'll find the max count for each color per game.
+
+```{r}
+totals <- lapply(values, function(value) {
+  c(red=max(unlist(value['red'])), green=max(unlist(value['green'])), blue=max(unlist(value['blue'])))
+})
+```
+
+## Determine which games are possible
+
+Given the target of `12 red cubes, 13 green cubes, and 14 blue cubes` we will calculate which of the games in our input data would be possible. We can do this by finding all games that have less than or equal to each of the values.
+
+```{r}
+max_red <- 12
+max_green <- 13
+max_blue <- 14
+
+valids <- lapply(totals, function(total) {
+  total['red'] <= max_red && total['green'] <= max_green && total['blue'] <= max_blue
+})
+```
+
+## Sum the ids for each valid game
+
+Finally, calculate the sum of all valid ids within the games.
+
+```{r}
+print(sum(which(valids == T)))
+```
+
+## Part 2 - Find the sum of the power of cubes in each game
+
+The second part asks us to find the power of cubes in each game by multiplying the fewest color count of cubes from each game (or the max per color) and multiple those values together to produce the power. Finally, we sum the powers of all games.
+
+We have already calculated `totals`, so we can reuse this for the current problem.
+
+```{r}
+powers <- lapply(totals, function(total) {
+  total['red'] * total['green'] * total['blue']
+})
+
+print(sum(unlist(powers)))
+```
