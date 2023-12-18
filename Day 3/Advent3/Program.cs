@@ -7,5 +7,9 @@ var lines = CommonManager.ReadInput(Path.Combine(Directory.GetCurrentDirectory()
 var mapping = CommonManager.Analyze(lines);
 
 // Find all numbers that are adjacent to the symbols.
-Console.WriteLine(CommonManager.FindParts(mapping).Sum());
-Console.WriteLine(CommonManager.FindGears(mapping).Sum());
+var values = CommonManager.FindAdjacent(mapping);
+values.ForEach(Console.WriteLine);
+
+Console.WriteLine(values.Sum());
+
+Console.WriteLine(CommonManager.FindAdjacentGears(mapping).Sum());
