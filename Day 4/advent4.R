@@ -57,8 +57,8 @@ lapply(seq(matching), function(i) {
   # If there is at least one winning number, increment the counts for the subsequent cards.
   if (count > 0) {
     # Set the first and last card to increment the counts for.
-    first_card <- min(i + 1, length(scores))
-    last_card <- min(i + 1 + count - 1, length(scores))
+    first_card <- i + 1
+    last_card <- i + 1 + count - 1
     
     # Update the count for each subsequent card.
     for (card_number in seq(first_card, last_card)) {
